@@ -1,0 +1,58 @@
+{
+  "name": "tp_ttt",
+  "version": "0.1.0",
+  "author": "Louis MOUHAT <louis.mouhat@gmail.com>",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "if test \"$NODE_ENV\" = \"production\" ; then npm run build; fi ",
+    "start": "node index.js",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "vue": {
+    "devServer": {
+      "proxy": "http://localhost:3333"
+    }
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "compression": "^1.7.4",
+    "core-js": "^3.6.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "vue": "^2.6.11",
+    "vue-router": "^3.2.0",
+    "vuex": "^3.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pop123123123/tp_ttt_express_vue.git"
+  },
+  "homepage": "https://github.com/pop123123123/tp_ttt_express_vue#readme",
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.5.0",
+    "@vue/cli-plugin-eslint": "^4.5.0",
+    "@vue/cli-service": "^4.5.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-vue": "^6.2.2",
+    "lint-staged": "^9.5.0",
+    "prettier": "^2.2.1",
+    "sass": "^1.26.5",
+    "sass-loader": "^8.0.2",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,vue}": [
+      "vue-cli-service lint",
+      "git add"
+    ]
+  }
+}
