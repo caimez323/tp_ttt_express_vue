@@ -5,7 +5,7 @@
   "license": "ISC",
   "main": "index.js",
   "scripts": {
-    "postinstall": "if test \"$NODE_ENV\" = \"production\" ; then npm run build; fi ",
+    "heroku-postbuild": "npm run build",
     "start": "node index.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
