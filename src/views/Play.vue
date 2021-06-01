@@ -19,27 +19,29 @@
     <p v-if="password != null">Room #{{ password }}</p>
     <!--player here-->
     <div v-if="password != null && gameat != null">
-      <button
-        v-on:click="
-          playThisCell(key);
-          actDisplay();
-        "
-        class="inv"
-        v-for="(val, key) in valButton"
-        :key="key"
-      >
-        {{ key }}
-        <img
-          v-if="gameat.grid[key].display == 1"
-          class="picture"
-          src="../assets/cross.png"
-        />
-        <img
-          v-if="gameat.grid[key].display == 2"
-          class="picture"
-          src="../assets/round.png"
-        />
-      </button>
+      <template v-for="(val, key) in valButton">
+        <button
+          v-on:click="
+            playThisCell(key);
+            actDisplay();
+          "
+          class="inv"
+          :key="key"
+        >
+          {{ key }}
+          <img
+            v-if="gameat.grid[key].display == 1"
+            class="picture"
+            src="../assets/cross.png"
+          />
+          <img
+            v-if="gameat.grid[key].display == 2"
+            class="picture"
+            src="../assets/round.png"
+          />
+        </button>
+        <br :key="key + 0.5" v-if="(key + 1) % 3 == 0" />
+      </template>
 
       <!--
       <button v-on:click="playThisCell(0);actDisplay()" class="inv" >
