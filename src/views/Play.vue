@@ -1,5 +1,6 @@
 <template>
   <div class="play">
+    <!-- TODO stop if not in game (quit via the navbar) -->
     <h1 v-if="!isPlaying">To join a game enter a code here</h1>
     <input
       v-if="!isPlaying"

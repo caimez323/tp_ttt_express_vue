@@ -81,6 +81,10 @@ router.post("/roomList", async (req, res) => {
     const room = req.body;
     const newRoom = new Room(room.roomId, room.playerNumber);
     RoomList.push(newRoom);
+
+    //Delete the room with no player
+    RoomList = RoomList.filter((room) => room.playerNumber != null);
+
     res.status(200).send();
   } catch (err) {
     console.error(err);
