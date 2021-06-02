@@ -17,13 +17,13 @@
       Join
     </button>
     <p v-if="isPlaying">Room #{{ password }}</p>
+    <h1 v-if="win !== 0">{{ winString }}</h1>
     <div v-if="isPlaying">
       <template v-for="(val, key) in valButton">
         <button
           v-on:click="
             PlayThisCell(key);
             ActDisplay();
-            isWin();
           "
           class="inv"
           :key="key"
@@ -57,6 +57,7 @@ export default {
       nIntervId: null,
       message: null,
       win: 0,
+      winString: "",
       valButton: [
         { content: 0 },
         { content: 1 },
@@ -76,112 +77,117 @@ export default {
       if (this.isPlaying) {
         let everyGame = (await axios.get("api/gameList")).data;
         this.GameAt = everyGame.find((game) => game.id == searchId);
+        this.isWin(this.GameAt);
         console.log(this.GameAt);
       }
     },
     async PlayThisCell(numCell) {
       //Send the action to the server
-      let payload = {
-        id: this.password,
-        cell: numCell,
-        payloadPlayer: this.player,
-      };
+      if (this.win === 0) {
+        let payload = {
+          id: this.password,
+          cell: numCell,
+          payloadPlayer: this.player,
+        };
 
-      await axios.post("/api/play", payload);
+        await axios.post("/api/play", payload);
+      }
     },
 
     async ActDisplay() {
-      await this.SeeGameAt(this.password);
+      if (this.win === 0) {
+        await this.SeeGameAt(this.password);
+      }
     },
 
-    async isWin() {
+    async isWin(game) {
       // called each play
-      await this.SeeGameAt(this.password);
-      const gameGrid = this.GameAt.grid;
-      let preWin = 0;
-      if (gameGrid[0].state === 1) {
-        // first two possibilites of winning
-        let display = gameGrid[0].display;
-        if (
-          gameGrid[1].display === display &&
-          gameGrid[2].display === display
-        ) {
-          preWin = 1;
-        } else if (
-          gameGrid[3].display === display &&
-          gameGrid[6].display === display
-        ) {
-          preWin = 1;
+      if (game !== null && game !== undefined) {
+        const gameGrid = game.grid;
+        let preWin = 0;
+        if (gameGrid[0].state === 1) {
+          // first two possibilites of winning
+          let display = gameGrid[0].display;
+          if (
+            gameGrid[1].display === display &&
+            gameGrid[2].display === display
+          ) {
+            preWin = 1;
+          } else if (
+            gameGrid[3].display === display &&
+            gameGrid[6].display === display
+          ) {
+            preWin = 1;
+          }
         }
-      }
 
-      if (gameGrid[8].state === 1) {
-        // last two possiblities of winning
-        let display = gameGrid[8].display;
-        if (
-          gameGrid[2].display === display &&
-          gameGrid[5].display === display
-        ) {
-          preWin = 3;
-        } else if (
-          gameGrid[6].display === display &&
-          gameGrid[7].display === display
-        ) {
-          preWin = 3;
+        if (gameGrid[8].state === 1) {
+          // last two possiblities of winning
+          let display = gameGrid[8].display;
+          if (
+            gameGrid[2].display === display &&
+            gameGrid[5].display === display
+          ) {
+            preWin = 3;
+          } else if (
+            gameGrid[6].display === display &&
+            gameGrid[7].display === display
+          ) {
+            preWin = 3;
+          }
         }
-      }
 
-      if (gameGrid[4].state === 1) {
-        // We need to check the mid-vertical and the mid-horizontal then the diagonals
-        let display = gameGrid[4].display;
-        if (
-          gameGrid[1].display === display &&
-          gameGrid[7].display === display
-        ) {
-          //mid vertical
-          preWin = 2;
-        } else if (
-          gameGrid[3].display === display &&
-          gameGrid[5].display === display
-        ) {
-          //mid horizontal
-          preWin = 2;
-        } else if (
-          gameGrid[0].display === display &&
-          gameGrid[8].display === display
-        ) {
-          //diago up left
-          preWin = 2;
-        } else if (
-          gameGrid[2].display === display &&
-          gameGrid[6].display === display
-        ) {
-          //diago up right
-          preWin = 2;
+        if (gameGrid[4].state === 1) {
+          // We need to check the mid-vertical and the mid-horizontal then the diagonals
+          let display = gameGrid[4].display;
+          if (
+            gameGrid[1].display === display &&
+            gameGrid[7].display === display
+          ) {
+            //mid vertical
+            preWin = 2;
+          } else if (
+            gameGrid[3].display === display &&
+            gameGrid[5].display === display
+          ) {
+            //mid horizontal
+            preWin = 2;
+          } else if (
+            gameGrid[0].display === display &&
+            gameGrid[8].display === display
+          ) {
+            //diago up left
+            preWin = 2;
+          } else if (
+            gameGrid[2].display === display &&
+            gameGrid[6].display === display
+          ) {
+            //diago up right
+            preWin = 2;
+          }
         }
-      }
-      switch (preWin) {
-        case 1:
-          this.win = gameGrid[0].display;
-          break;
-        case 2:
-          this.win = gameGrid[4].display;
-          break;
-        case 3:
-          this.win = gameGrid[8].display;
-          break;
-      }
+        switch (preWin) {
+          case 1:
+            this.win = gameGrid[0].display;
+            break;
+          case 2:
+            this.win = gameGrid[4].display;
+            break;
+          case 3:
+            this.win = gameGrid[8].display;
+            break;
+        }
 
-      //Stop then display message if win
-      if (this.win !== 0) {
-        this.StopDisplay();
-        let string = "The winner is ";
-        if (this.win === 1) {
-          string = string + "player 1 (cross)";
-        } else if (this.win === 2) {
-          string = string + "player 2 (circle)";
+        //Stop then display message if win
+        if (this.win !== 0) {
+          this.StopDisplay();
+          this.winString = "The winner is ";
+          if (this.win === 1) {
+            this.winString = this.winString + "player 1 (cross)";
+          } else if (this.win === 2) {
+            this.winString = this.winString + "player 2 (circle)";
+          }
         }
-        window.alert(string);
       }
     },
 
