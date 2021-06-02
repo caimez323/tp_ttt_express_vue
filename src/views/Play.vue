@@ -1,64 +1,46 @@
 <template>
   <div class="play">
-    <h1 v-if="password == null">To join a game enter a code here</h1>
+    <h1 v-if="!isPlaying">To join a game enter a code here</h1>
     <input
-      v-if="password == null"
+      v-if="!isPlaying"
       v-model="message"
       placeholder="Enter the password"
     />
     <button
-      v-if="password == null"
+      v-if="!isPlaying"
       v-on:click="
-        password = message;
+        password = Number(message);
         SeeGameAt();
         GivePlayer();
       "
     >
       Join
     </button>
-    <p v-if="password != null">Room #{{ password }}</p>
-    <!--player here-->
-    <div v-if="password != null && gameat != null">
+    <p v-if="isPlaying">Room #{{ password }}</p>
+    <div v-if="isPlaying">
       <template v-for="(val, key) in valButton">
         <button
           v-on:click="
-            playThisCell(key);
-            actDisplay();
+            PlayThisCell(key);
+            ActDisplay();
           "
           class="inv"
           :key="key"
         >
           {{ key }}
           <img
-            v-if="gameat.grid[key].display == 1"
+            v-if="GameAt != null && GameAt.grid[key].display == 1"
             class="picture"
             src="../assets/cross.png"
           />
           <img
-            v-if="gameat.grid[key].display == 2"
+            v-if="GameAt != null && GameAt.grid[key].display == 2"
             class="picture"
             src="../assets/round.png"
           />
         </button>
         <br :key="key + 0.5" v-if="(key + 1) % 3 == 0" />
       </template>
-
-      <!--
-      <button v-on:click="playThisCell(0);actDisplay()" class="inv" >
-        <img v-if="chemin1 == 1" class="picture" src="../assets/cross.png" />1
-      </button>
-      <button class="inv" >2</button>
-      <button class="inv" >3</button>
-      <br />
-      <button class="inv" >4</button>
-      <button class="inv" >5</button>
-      <button class="inv" >6</button>
-      <br />
-      <button class="inv" >7</button>
-      <button class="inv" >8</button>
-      <button class="inv" >9</button>
-      <br />
-      -->
     </div>
   </div>
 </template>
@@ -69,8 +51,7 @@ export default {
   data: function () {
     return {
       password: null,
-      chemin1: 0,
-      gameat: null,
+      GameAt: null,
       player: null,
       nIntervId: null,
       message: null,
@@ -89,65 +70,51 @@ export default {
   },
 
   methods: {
-    async SeeGameAt(searchid) {
-      let everygame = (await axios.get("api/gameslist")).data;
-      for (let index = 0; index < everygame.length; index++) {
-        if (everygame[index].id == searchid) {
-          this.gameat = everygame[index];
-        }
-      }
+    async SeeGameAt(searchId) {
+      let everyGame = (await axios.get("api/gameList")).data;
+      this.GameAt = everyGame.find((game) => game.id == searchId);
+      console.log(this.GameAt);
     },
-    async playThisCell(numcell) {
+    async PlayThisCell(numCell) {
       //Send the action to the server
       let payload = {
         id: this.password,
-        cell: numcell,
-        payloadplayer: this.player,
+        cell: numCell,
+        payloadPlayer: this.player,
       };
 
       await axios.post("/api/play", payload);
     },
 
-    async actDisplay() {
-      if (this.password != null) {
-        await this.SeeGameAt(this.password);
-        /*let actgame = this.gameat;
-        for (let i = 0; i < actgame.grid.length; i++) {
-          if (actgame.grid[i].state == 1) {
-            actgame.grid[i].display = 1;
-          }
-        }*/
-      }
+    async ActDisplay() {
+      await this.SeeGameAt(this.password);
     },
 
-    changeDisplay() {
-      this.nIntervId = setInterval(this.actDisplay, 1000);
-      //TODO arrêter quand le password redeviend null
+    ChangeDisplay() {
+      this.nIntervId = setInterval(this.ActDisplay, 1000);
     },
 
-    stopDisplay() {
+    StopDisplay() {
+      //TODO stop display if win
       clearInterval(this.nIntervId);
     },
 
     async GivePlayer() {
-      let rls = (await axios.get("/api/roomlist")).data;
-      console.log(rls);
-      let numplayer = null;
-      for (let i = 0; i < rls.length; i++) {
-        if (this.password == rls[i].roomid) {
-          numplayer = rls[i].playernumber;
-        }
-      }
-      console.log(numplayer);
+      let rls = (await axios.get("/api/roomList")).data;
+      let numPlayer = null;
+
+      const found = rls.find((room) => room.roomId == this.password);
+      numPlayer = found.playerNumber;
+
       let payload;
-      if (numplayer == 0) {
+      if (numPlayer == 0) {
         this.player = 1;
         payload = {
           id: this.password,
-          payloadplayer: this.player,
+          payloadPlayer: this.player,
         };
         await axios.post("/api/player", payload);
-      } else if (numplayer == 1) {
+      } else if (numPlayer == 1) {
         this.player = 2;
         payload = {
           id: this.password,
@@ -155,13 +122,20 @@ export default {
         };
         await axios.post("/api/player", payload);
       } else {
-        //ERROR, ROOM FULL
+        window.alert(
+          "This game is full.\nYou can still watch it as a spectator."
+        );
       }
     },
   },
 
   mounted() {
-    this.changeDisplay();
+    this.ChangeDisplay();
+  },
+  computed: {
+    isPlaying() {
+      return this.password !== null;
+    },
   },
 };
 </script>

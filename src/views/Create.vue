@@ -11,7 +11,7 @@
       Create a game
     </button>
     <p v-if="gotoCreation">The password is : {{ password }}</p>
-    <p v-if="gotoCreation">Liste des rooms : {{ roomlist }}</p>
+    <p v-if="gotoCreation">Liste des rooms : {{ roomList }}</p>
     <br />
   </div>
 </template>
@@ -25,29 +25,26 @@ export default {
       gotoCreation: false,
       info: null,
       password: null,
-      roomlist: null,
+      roomList: null,
     };
   },
 
   methods: {
     async NewRoom() {
       let RmList;
-      RmList = (await axios.get("/api/roomlist")).data;
+      RmList = (await axios.get("/api/roomList")).data;
       let retry = true;
       let tmp;
       do {
         retry = false;
         tmp = Math.floor(Math.random() * 100000) + 1;
-        for (let i = 0; i < RmList.length; i++) {
-          if (RmList[i].roomid == tmp) {
-            retry = true;
-          }
-        }
+        //if there is no room empty, will just be stuck forever TODO
+        retry = RmList.some((room) => room.roomId === tmp);
       } while (retry);
       this.password = tmp;
       let payload = {
-        roomid: tmp,
-        playernumber: 0,
+        roomId: tmp,
+        playerNumber: 0,
       };
       let cell = {
         state: 0,
@@ -58,11 +55,11 @@ export default {
         grid: [cell, cell, cell, cell, cell, cell, cell, cell, cell],
       };
 
-      await axios.post("/api/roomlistwrite", payload);
-      await axios.post("/api/gameslistwrite", payload2);
+      await axios.post("/api/roomList", payload);
+      await axios.post("/api/gameList", payload2);
     },
     async GetRoomList() {
-      this.roomlist = (await axios.get(`/api/roomlist`)).data;
+      this.roomList = (await axios.get(`/api/roomList`)).data;
     },
   },
 };

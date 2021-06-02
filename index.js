@@ -50,9 +50,9 @@ class Cell {
   }
 }
 class Room {
-  constructor(roomid, playernumber) {
-    this.roomid = roomid;
-    this.playernumber = playernumber;
+  constructor(roomId, playerNumber) {
+    this.roomId = roomId;
+    this.playerNumber = playerNumber;
   }
 }
 
@@ -76,10 +76,10 @@ let RoomList = [];
 RoomList.push(room0);
 allGames.push(game0);
 
-router.post("/roomlistwrite", async (req, res) => {
+router.post("/roomList", async (req, res) => {
   try {
     const room = req.body;
-    const newRoom = new Room(room.roomid, room.playernumber);
+    const newRoom = new Room(room.roomId, room.playerNumber);
     RoomList.push(newRoom);
     res.status(200).send();
   } catch (err) {
@@ -88,7 +88,7 @@ router.post("/roomlistwrite", async (req, res) => {
   }
 });
 
-router.get("/roomlist", async (req, res) => {
+router.get("/roomList", async (req, res) => {
   try {
     res.send(RoomList);
   } catch (err) {
@@ -97,7 +97,7 @@ router.get("/roomlist", async (req, res) => {
   }
 });
 
-router.post("/gameslistwrite", async (req, res) => {
+router.post("/gameList", async (req, res) => {
   try {
     const game = req.body;
     const newGame = new Game(game.id, game.grid);
@@ -109,7 +109,7 @@ router.post("/gameslistwrite", async (req, res) => {
   }
 });
 
-router.get("/gameslist", async (req, res) => {
+router.get("/gameList", async (req, res) => {
   try {
     res.send(allGames);
   } catch (err) {
@@ -125,7 +125,7 @@ router.post("/play", async (req, res) => {
 
     for (let i = 0; i < allGames.length; i++) {
       if (mouv.id == allGames[i].id) {
-        allGames[i].playcell(mouv.cell, mouv.payloadplayer);
+        allGames[i].playcell(mouv.cell, mouv.payloadPlayer);
       }
     }
 
@@ -142,8 +142,8 @@ router.post("/player", async (req, res) => {
     const modifRoom = req.body;
 
     for (let i = 0; i < RoomList.length; i++) {
-      if (modifRoom.id == RoomList[i].roomid) {
-        RoomList[i].playernumber = modifRoom.payloadplayer;
+      if (modifRoom.id == RoomList[i].roomId) {
+        RoomList[i].playerNumber = modifRoom.payloadPlayer;
       }
     }
 
