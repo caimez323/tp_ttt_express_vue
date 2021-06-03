@@ -112,6 +112,10 @@ export default {
   transform: translateY(4px);
 }
 
+.txtBlack {
+  color: black;
+}
+
 .txtRed {
   color: rgb(146, 5, 5);
   font-size: 20px;

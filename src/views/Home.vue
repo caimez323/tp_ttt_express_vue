@@ -10,6 +10,9 @@ img {
   width: 15em;
   height: auto;
 }
+.txtBlack {
+  color: black;
+}
 </style>
 
 <script></script>

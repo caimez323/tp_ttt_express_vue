@@ -20,7 +20,7 @@
       v-if="!isPlaying"
       v-on:click="
         password = Number(message);
-        SeeGameAt();
+        SeeGameAt(password);
         GivePlayer();
       "
     >
@@ -28,12 +28,15 @@
       <!-- TODO The game exists ? -->
     </button>
 
-    <p class="txtBlack" v-if="isPlaying">Share this link :</p>
-    <p class="txtBlack" v-if="isPlaying">
+    <p class="txtRed" v-if="!gameExist && isPlaying">
+      This game doesn't exist.
+    </p>
+    <p class="txtBlack" v-if="isPlaying && gameExist">Share this link :</p>
+    <p class="txtBlack" v-if="isPlaying && gameExist">
       Room <strong># {{ password }}</strong>
     </p>
     <h1 v-if="win !== 0">{{ winString }}</h1>
-    <div v-if="isPlaying">
+    <div v-if="isPlaying && gameExist">
       <template v-for="(val, key) in valButton">
         <button
           v-on:click="
@@ -92,6 +95,9 @@ export default {
         let everyGame = (await axios.get("api/gameList")).data;
         this.gameAt = everyGame.find((game) => game.id == searchId);
         this.isWin(this.gameAt);
+        if (!this.gameExist) {
+          this.StopDisplay();
+        }
         console.log(this.gameAt);
       }
     },
@@ -215,31 +221,35 @@ export default {
     },
 
     async GivePlayer() {
-      let rls = (await axios.get("/api/roomList")).data;
-      let numPlayer = null;
+      if (this.isPlaying) {
+        let rls = (await axios.get("/api/roomList")).data;
+        let numPlayer = null;
 
-      const found = rls.find((room) => room.roomId == this.password);
-      numPlayer = found.playerNumber;
+        const found = rls.find((room) => room.roomId == this.password);
+        if (found !== undefined) {
+          numPlayer = found.playerNumber;
 
-      let payload;
-      if (numPlayer == 0) {
-        this.player = 1;
-        payload = {
-          id: this.password,
-          payloadPlayer: this.player,
-        };
-        await axios.post("/api/player", payload);
-      } else if (numPlayer == 1) {
-        this.player = 2;
-        payload = {
-          id: this.password,
-          payloadplayer: this.player,
-        };
-        await axios.post("/api/player", payload);
-      } else {
-        window.alert(
-          "This game is full.\nYou can still watch it as a spectator."
-        );
+          let payload;
+          if (numPlayer == 0) {
+            this.player = 1;
+            payload = {
+              id: this.password,
+              payloadPlayer: this.player,
+            };
+            await axios.post("/api/player", payload);
+          } else if (numPlayer == 1) {
+            this.player = 2;
+            payload = {
+              id: this.password,
+              payloadplayer: this.player,
+            };
+            await axios.post("/api/player", payload);
+          } else {
+            window.alert(
+              "This game is full.\nYou can still watch it as a spectator."
+            );
+          }
+        }
       }
     },
   },
@@ -269,11 +279,18 @@ export default {
       }
       return cellTab;
     },
+    gameExist() {
+      return this.gameAt !== undefined && this.gameAt !== null;
+    },
   },
 };
 </script>
 
 <style lang="scss">
+.txtRed {
+  color: rgb(146, 5, 5);
+  font-size: 20px;
+}
 .inv {
   border: none;
   padding: 128px 128px;
