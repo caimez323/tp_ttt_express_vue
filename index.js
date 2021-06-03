@@ -1,6 +1,7 @@
 const express = require("express");
 const compression = require("compression");
 const cors = require("cors");
+const history = require('connect-history-api-fallback');
 
 // initialize express app
 const app = express();
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(compression());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(history());
 
 // serve vue app
 const publicAdminRoot = "dist";
