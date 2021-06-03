@@ -1,7 +1,13 @@
 <template>
   <div id="create">
-    <h1>This is the game creation page</h1>
+    <br />
+    <br />
+    <br />
+    <h1 class="txtBlack">
+      Click on the button to create your game and invite your friends !
+    </h1>
     <button
+      class="buttonBlack"
       v-on:click.once="
         gotoCreation = true;
         NewRoom();
@@ -9,8 +15,11 @@
       "
     >
       Create a game
+      <!-- TODO Auto redirection -->
     </button>
-    <p v-if="gotoCreation">The password is : {{ password }}</p>
+    <p class="txtBlack" v-if="gotoCreation">
+      The password is : <strong>{{ password }}</strong>
+    </p>
     <p v-if="gotoCreation">Liste des rooms : {{ roomList }}</p>
     <br />
   </div>
@@ -64,3 +73,29 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+.buttonBlack {
+  background-color: white;
+  border: 2px solid #555555;
+  color: black;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; //Safari
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.buttonBlack:hover {
+  background-color: #555555;
+  color: white;
+}
+
+.buttonBlack:active {
+  transform: translateY(4px);
+}
+</style>

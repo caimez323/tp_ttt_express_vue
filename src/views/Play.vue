@@ -1,13 +1,22 @@
 <template>
   <div class="play">
     <!-- TODO stop if not in game (quit via the navbar) -->
-    <h1 v-if="!isPlaying">To join a game enter a code here</h1>
+
+    <br v-if="!isPlaying" />
+    <br v-if="!isPlaying" />
+    <br v-if="!isPlaying" />
+
+    <h1 class="txtBlack" v-if="!isPlaying">
+      To join a game enter a code here or directly click the link
+    </h1>
     <input
+      class="txtField"
       v-if="!isPlaying"
       v-model="message"
       placeholder="Enter the password"
     />
     <button
+      class="buttonBlack2"
       v-if="!isPlaying"
       v-on:click="
         password = Number(message);
@@ -16,8 +25,13 @@
       "
     >
       Join
+      <!-- TODO The game exists ? -->
     </button>
-    <p v-if="isPlaying">Room #{{ password }}</p>
+
+    <p class="txtBlack" v-if="isPlaying">Share this link :</p>
+    <p class="txtBlack" v-if="isPlaying">
+      Room <strong># {{ password }}</strong>
+    </p>
     <h1 v-if="win !== 0">{{ winString }}</h1>
     <div v-if="isPlaying">
       <template v-for="(val, key) in valButton">
@@ -26,17 +40,16 @@
             PlayThisCell(key);
             ActDisplay();
           "
-          class="inv"
+          :class="isCross[key] ? 'cross' : isCircle[key] ? 'circle' : 'inv'"
           :key="key"
         >
-          {{ key }}
           <img
-            v-if="GameAt != null && GameAt.grid[key].display == 1"
+            v-if="gameAt != null && gameAt.grid[key].display == 1"
             class="picture"
             src="../assets/cross.png"
           />
           <img
-            v-if="GameAt != null && GameAt.grid[key].display == 2"
+            v-if="gameAt != null && gameAt.grid[key].display == 2"
             class="picture"
             src="../assets/round.png"
           />
@@ -53,7 +66,7 @@ export default {
   data: function () {
     return {
       password: null,
-      GameAt: null,
+      gameAt: null,
       player: null,
       nIntervId: null,
       message: null,
@@ -77,13 +90,14 @@ export default {
     async SeeGameAt(searchId) {
       if (this.isPlaying) {
         let everyGame = (await axios.get("api/gameList")).data;
-        this.GameAt = everyGame.find((game) => game.id == searchId);
-        this.isWin(this.GameAt);
-        console.log(this.GameAt);
+        this.gameAt = everyGame.find((game) => game.id == searchId);
+        this.isWin(this.gameAt);
+        console.log(this.gameAt);
       }
     },
     async PlayThisCell(numCell) {
       //Send the action to the server
+      //TODO Not play if this cell is already full
       if (this.win === 0) {
         let payload = {
           id: this.password,
@@ -237,6 +251,24 @@ export default {
     isPlaying() {
       return this.password !== null;
     },
+    isCross() {
+      let cellTab = [];
+      if (this.gameAt !== null && this.gameAt !== undefined) {
+        for (let i = 0; i < this.gameAt.grid.length; i++) {
+          cellTab.push(this.gameAt.grid[i].display === 1);
+        }
+      }
+      return cellTab;
+    },
+    isCircle() {
+      let cellTab = [];
+      if (this.gameAt !== null && this.gameAt !== undefined) {
+        for (let i = 0; i < this.gameAt.grid.length; i++) {
+          cellTab.push(this.gameAt.grid[i].display === 2);
+        }
+      }
+      return cellTab;
+    },
   },
 };
 </script>
@@ -245,18 +277,74 @@ export default {
 .inv {
   border: none;
   padding: 128px 128px;
-  font-size: 0rem;
+  font-size: 10rem;
   text-align: center;
-  color: #ffffff;
+  color: white;
   border-radius: 0px;
   border: 1px solid rgb(0, 0, 0);
-  background-color: rgba(1, 0, 0, 0);
-  margin-left: auto;
-  margin-right: auto;
+  background-color: rgb(255, 255, 255);
+}
+
+.inv:hover {
+  background-color: rgb(210, 210, 210);
 }
 
 .picture {
-  width: 64px;
+  width: 242px;
+  border: none;
   position: relative;
+}
+
+.txtBlack {
+  color: black;
+}
+
+.buttonBlack2 {
+  background-color: white;
+  border: 2px solid #555555;
+  color: black;
+  padding: 3px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; //Safari
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.buttonBlack2:hover {
+  background-color: #555555;
+  color: white;
+}
+
+.buttonBlack2:active {
+  transform: translateY(4px);
+}
+
+.txtField {
+  width: 10%;
+  height: 23px;
+}
+
+.cross {
+  vertical-align: -119.5px;
+  height: 258px;
+  background-color: white;
+  color: white;
+}
+.cross:hover {
+  cursor: not-allowed;
+}
+
+.circle {
+  vertical-align: -119.5px;
+  height: 258px;
+  background-color: white;
+  color: white;
+}
+.circle:hover {
+  cursor: not-allowed;
 }
 </style>

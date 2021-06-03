@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <h1>Tic tac toe</h1>
+    <h1 class="txtBlack">Tic tac toe</h1>
     <img alt="logo" src="../assets/logo.png" />
   </div>
 </template>
