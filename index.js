@@ -1,7 +1,7 @@
 const express = require("express");
 const compression = require("compression");
 const cors = require("cors");
-const history = require('connect-history-api-fallback');
+const history = require("connect-history-api-fallback");
 
 // initialize express app
 const app = express();
@@ -80,8 +80,9 @@ router.post("/roomList", async (req, res) => {
   try {
     const room = req.body;
     const newRoom = new Room(room.roomId, room.playerNumber);
-    RoomList.push(newRoom);
-
+    if (newRoom.roomId != null) {
+      RoomList.push(newRoom);
+    }
     //Delete the room with no player
     RoomList = RoomList.filter((room) => room.playerNumber != null);
 

@@ -17,10 +17,13 @@
       Create a game
       <!-- TODO Auto redirection -->
     </button>
-    <p class="txtBlack" v-if="gotoCreation">
+    <p class="txtRed" v-if="gotoCreation && !roomRemain">
+      <strong>There are currently no room available. Please try again !</strong>
+    </p>
+    <p class="txtBlack" v-if="gotoCreation && roomRemain">
       The password is : <strong>{{ password }}</strong>
     </p>
-    <p v-if="gotoCreation">Liste des rooms : {{ roomList }}</p>
+    <p v-if="gotoCreation && roomRemain">Liste des rooms : {{ roomList }}</p>
     <br />
   </div>
 </template>
@@ -34,41 +37,51 @@ export default {
       gotoCreation: false,
       info: null,
       password: null,
-      roomList: null,
+      roomList: [],
+      MAX_ROOM: 100000,
     };
   },
 
   methods: {
     async NewRoom() {
-      let RmList;
-      RmList = (await axios.get("/api/roomList")).data;
+      this.roomList = (await axios.get("/api/roomList")).data;
       let retry = true;
       let tmp;
-      do {
-        retry = false;
-        tmp = Math.floor(Math.random() * 100000) + 1;
-        //if there is no room empty, will just be stuck forever TODO
-        retry = RmList.some((room) => room.roomId === tmp);
-      } while (retry);
-      this.password = tmp;
-      let payload = {
-        roomId: tmp,
-        playerNumber: 0,
-      };
-      let cell = {
-        state: 0,
-        display: 0,
-      };
-      let payload2 = {
-        id: this.password,
-        grid: [cell, cell, cell, cell, cell, cell, cell, cell, cell],
-      };
+      //if there is no room empty, send a server a try to delete one
+      if (this.roomRemain) {
+        do {
+          retry = false;
+          tmp = Math.floor(Math.random() * this.MAX_ROOM) + 1;
+          retry = this.roomList.some((room) => room.roomId === tmp);
+        } while (retry);
+        this.password = tmp;
+        let payload = {
+          roomId: tmp,
+          playerNumber: 0,
+        };
+        let cell = {
+          state: 0,
+          display: 0,
+        };
+        let payload2 = {
+          id: this.password,
+          grid: [cell, cell, cell, cell, cell, cell, cell, cell, cell],
+        };
 
-      await axios.post("/api/roomList", payload);
-      await axios.post("/api/gameList", payload2);
+        await axios.post("/api/roomList", payload);
+        await axios.post("/api/gameList", payload2);
+      } else {
+        await axios.post("/api/roomList", { roomId: null, playerNumber: null });
+      }
     },
     async GetRoomList() {
-      this.roomList = (await axios.get(`/api/roomList`)).data;
+      this.roomList = (await axios.get("/api/roomList")).data;
+    },
+  },
+
+  computed: {
+    roomRemain() {
+      return this.roomList.length < this.MAX_ROOM - 10;
     },
   },
 };
@@ -97,5 +110,10 @@ export default {
 
 .buttonBlack:active {
   transform: translateY(4px);
+}
+
+.txtRed {
+  color: rgb(146, 5, 5);
+  font-size: 20px;
 }
 </style>
