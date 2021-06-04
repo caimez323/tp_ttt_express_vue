@@ -100,13 +100,17 @@ export default {
     },
     async PlayThisCell(numCell) {
       //Send the action to the server
-      //TODO Not play if this cell is already full
 
       let rooms = (await axios.get("/api/roomList")).data;
       const index = rooms.findIndex((room) => room.roomId == this.password);
 
       //TODO The player can still spam super fast and player more than one time
-      if (this.win === 0 && rooms[index].prevPlayer !== this.player) {
+      if (
+        this.win === 0 &&
+        rooms[index].prevPlayer !== this.player &&
+        this.gameExist &&
+        this.gameAt.grid[numCell].state === 0
+      ) {
         let payload = {
           id: this.password,
           cell: numCell,
@@ -299,7 +303,6 @@ export default {
   font-size: 20px;
 }
 
-//TODO fix firefox's css padding
 .inv {
   border: none;
   padding: 128px 128px;
