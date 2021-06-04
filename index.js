@@ -50,9 +50,10 @@ class Cell {
   }
 }
 class Room {
-  constructor(roomId, playerNumber) {
+  constructor(roomId, playerNumber, prevPlayer) {
     this.roomId = roomId;
     this.playerNumber = playerNumber;
+    this.prevPlayer = prevPlayer;
   }
 }
 
@@ -70,7 +71,7 @@ const grid0 = [
 ];
 const game0 = new Game(0, grid0);
 
-const room0 = new Room(0, 0);
+const room0 = new Room(0, 0, 1);
 let RoomList = [];
 
 RoomList.push(room0);
@@ -127,12 +128,21 @@ router.post("/play", async (req, res) => {
   try {
     //const {id,cell,payloadplayer} = req.body;
     const mouv = req.body;
+    const index = allGames.findIndex((game) => game.id === mouv.id);
+    allGames[index].playcell(mouv.cell, mouv.payloadPlayer);
 
-    for (let i = 0; i < allGames.length; i++) {
-      if (mouv.id == allGames[i].id) {
-        allGames[i].playcell(mouv.cell, mouv.payloadPlayer);
-      }
-    }
+    res.status(200).send();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send();
+  }
+});
+
+router.post("/playerTurn", async (req, res) => {
+  try {
+    let actPlayer = req.body;
+    const index = RoomList.findIndex((room) => room.roomId == actPlayer.id);
+    RoomList[index].prevPlayer = actPlayer.player;
 
     res.status(200).send();
   } catch (err) {
@@ -146,11 +156,8 @@ router.post("/player", async (req, res) => {
     //const {id,payloadplayer} = req.body;
     const modifRoom = req.body;
 
-    for (let i = 0; i < RoomList.length; i++) {
-      if (modifRoom.id == RoomList[i].roomId) {
-        RoomList[i].playerNumber = modifRoom.payloadPlayer;
-      }
-    }
+    const index = RoomList.findIndex((room) => room.roomId == modifRoom.id);
+    RoomList[index].playerNumber = modifRoom.payloadPlayer;
 
     res.status(200).send();
   } catch (err) {

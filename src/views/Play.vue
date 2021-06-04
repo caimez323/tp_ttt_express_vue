@@ -3,8 +3,6 @@
     <!-- TODO stop if not in game (quit via the navbar) -->
 
     <br v-if="!isPlaying" />
-    <br v-if="!isPlaying" />
-    <br v-if="!isPlaying" />
 
     <h1 class="txtBlack" v-if="!isPlaying">
       To join a game enter a code here or directly click the link
@@ -25,7 +23,6 @@
       "
     >
       Join
-      <!-- TODO The game exists ? -->
     </button>
 
     <p class="txtRed" v-if="!gameExist && isPlaying">
@@ -104,7 +101,12 @@ export default {
     async PlayThisCell(numCell) {
       //Send the action to the server
       //TODO Not play if this cell is already full
-      if (this.win === 0) {
+
+      let rooms = (await axios.get("/api/roomList")).data;
+      const index = rooms.findIndex((room) => room.roomId == this.password);
+
+      //TODO The player can still spam super fast and player more than one time
+      if (this.win === 0 && rooms[index].prevPlayer !== this.player) {
         let payload = {
           id: this.password,
           cell: numCell,
@@ -112,6 +114,10 @@ export default {
         };
 
         await axios.post("/api/play", payload);
+        await axios.post("/api/playerTurn", {
+          player: this.player,
+          id: this.password,
+        });
       }
     },
 
@@ -261,6 +267,7 @@ export default {
     isPlaying() {
       return this.password !== null;
     },
+    //TODO change isCross and isCircle in one function and think to use map
     isCross() {
       let cellTab = [];
       if (this.gameAt !== null && this.gameAt !== undefined) {
@@ -291,6 +298,8 @@ export default {
   color: rgb(146, 5, 5);
   font-size: 20px;
 }
+
+//TODO fix firefox's css padding
 .inv {
   border: none;
   padding: 128px 128px;
