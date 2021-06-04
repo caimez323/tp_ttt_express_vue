@@ -262,6 +262,14 @@ export default {
         }
       }
     },
+
+    cellToBool(condition) {
+      if (this.gameExist) {
+        let cellTab = this.gameAt.grid;
+        cellTab = cellTab.map((x) => x.display === condition);
+        return cellTab;
+      }
+    },
   },
 
   mounted() {
@@ -271,24 +279,11 @@ export default {
     isPlaying() {
       return this.password !== null;
     },
-    //TODO change isCross and isCircle in one function and think to use map
     isCross() {
-      let cellTab = [];
-      if (this.gameAt !== null && this.gameAt !== undefined) {
-        for (let i = 0; i < this.gameAt.grid.length; i++) {
-          cellTab.push(this.gameAt.grid[i].display === 1);
-        }
-      }
-      return cellTab;
+      return this.cellToBool(1);
     },
     isCircle() {
-      let cellTab = [];
-      if (this.gameAt !== null && this.gameAt !== undefined) {
-        for (let i = 0; i < this.gameAt.grid.length; i++) {
-          cellTab.push(this.gameAt.grid[i].display === 2);
-        }
-      }
-      return cellTab;
+      return this.cellToBool(2);
     },
     gameExist() {
       return this.gameAt !== undefined && this.gameAt !== null;
