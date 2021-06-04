@@ -319,6 +319,8 @@ export default {
   width: 242px;
   border: none;
   position: relative;
+  vertical-align: 0px;
+  margin-top: 0px;
 }
 
 .txtBlack {
@@ -357,6 +359,7 @@ export default {
 .cross {
   vertical-align: -119.5px;
   height: 258px;
+  width: 258px;
   background-color: white;
   color: white;
 }
@@ -367,6 +370,7 @@ export default {
 .circle {
   vertical-align: -119.5px;
   height: 258px;
+  width: 258px;
   background-color: white;
   color: white;
 }
