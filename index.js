@@ -43,12 +43,12 @@ const Game = require("./common/game.js");
     this.grid[ncell].state = 1;
   }
 }*/
-class Cell {
+/*class Cell {
   constructor(state, display) {
     this.state = state;
     this.display = display;
   }
-}
+}*/
 class Room {
   constructor(roomId, playerNumber, prevPlayer) {
     this.roomId = roomId;
@@ -58,7 +58,7 @@ class Room {
 }
 
 let allGames = [];
-const grid0 = [
+/*const grid0 = [
   new Cell(0, 0),
   new Cell(0, 0),
   new Cell(0, 0),
@@ -69,13 +69,14 @@ const grid0 = [
   new Cell(0, 0),
   new Cell(0, 0),
 ];
-const game0 = new Game(0, grid0);
+*/
+//const game0 = new Game(0, grid0);
 
-const room0 = new Room(0, 0, 1);
+//const room0 = new Room(0, 0, 1);
 let RoomList = [];
 
-RoomList.push(room0);
-allGames.push(game0);
+//RoomList.push(room0);
+//allGames.push(game0);
 
 router.post("/roomList", async (req, res) => {
   try {
@@ -124,7 +125,7 @@ router.get("/gameList", async (req, res) => {
   }
 });
 
-router.post("/play", async (req, res) => {
+router.post("/gamePlay", async (req, res) => {
   try {
     //const {id,cell,payloadplayer} = req.body;
     const mouv = req.body;

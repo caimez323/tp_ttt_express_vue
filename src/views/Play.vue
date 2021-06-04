@@ -1,13 +1,8 @@
 <template>
   <div class="play">
     <!-- TODO stop if not in game (quit via the navbar) -->
-
     <br v-if="!isPlaying" />
-
-    <h1 class="txtBlack" v-if="!isPlaying">
-      To join a game enter a code here or directly click the link
-    </h1>
-    <input
+    <!-- <input
       class="txtField"
       v-if="!isPlaying"
       v-model="message"
@@ -19,16 +14,20 @@
       v-on:click="
         password = Number(message);
         SeeGameAt(password);
-        GivePlayer();
       "
     >
       Join
-    </button>
+    </button> -->
 
     <p class="txtRed" v-if="!gameExist && isPlaying">
       This game doesn't exist.
     </p>
-    <p class="txtBlack" v-if="isPlaying && gameExist">Share this link :</p>
+    <p class="txtBlack" v-if="isPlaying && gameExist">
+      <strong>Share this link : </strong>
+      <a v-bind:href="'http://mega-ttt.herokuapp.com/play/' + this.password"
+        >Copy me !</a
+      >
+    </p>
     <p class="txtBlack" v-if="isPlaying && gameExist">
       Room <strong># {{ password }}</strong>
     </p>
@@ -63,9 +62,11 @@
 <script>
 import axios from "axios";
 export default {
+  props: { password: Number },
+
   data: function () {
     return {
-      password: null,
+      attribut: "href",
       gameAt: null,
       player: null,
       nIntervId: null,
@@ -89,7 +90,7 @@ export default {
   methods: {
     async SeeGameAt(searchId) {
       if (this.isPlaying) {
-        let everyGame = (await axios.get("api/gameList")).data;
+        let everyGame = (await axios.get("/api/gameList")).data;
         this.gameAt = everyGame.find((game) => game.id == searchId);
         this.isWin(this.gameAt);
         if (!this.gameExist) {
@@ -117,7 +118,7 @@ export default {
           payloadPlayer: this.player,
         };
 
-        await axios.post("/api/play", payload);
+        await axios.post("/api/gamePlay", payload);
         await axios.post("/api/playerTurn", {
           player: this.player,
           id: this.password,
@@ -274,6 +275,7 @@ export default {
 
   mounted() {
     this.ChangeDisplay();
+    this.GivePlayer();
   },
   computed: {
     isPlaying() {

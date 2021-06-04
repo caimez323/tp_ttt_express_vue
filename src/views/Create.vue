@@ -11,19 +11,41 @@
       v-on:click.once="
         gotoCreation = true;
         NewRoom();
-        GetRoomList();
       "
     >
       Create a game
-      <!-- TODO Auto redirection -->
     </button>
+    <br />
+    <h3 class="txtBlack">Or</h3>
+    <button
+      class="buttonBlack"
+      v-on:click="
+        GetRoomList();
+        displayRoom = true;
+      "
+    >
+      See all rooms
+    </button>
+
+    <div v-if="displayRoom">
+      <p class="txtBlack">List of rooms :</p>
+      <template v-for="(val, key) in roomList.length">
+        <li :key="key" class="txtRoom">
+          Room n°{{ roomList[key].roomId }} :
+          <a
+            :key="key + 0.5"
+            v-bind:href="
+              'http://mega-ttt.herokuapp.com/play/' + roomList[key].roomId
+            "
+            >Join it</a
+          >
+        </li>
+      </template>
+    </div>
+
     <p class="txtRed" v-if="gotoCreation && !roomRemain">
       <strong>There are currently no room available. Please try again !</strong>
     </p>
-    <p class="txtBlack" v-if="gotoCreation && roomRemain">
-      The password is : <strong>{{ password }}</strong>
-    </p>
-    <p v-if="gotoCreation && roomRemain">Liste des rooms : {{ roomList }}</p>
     <br />
   </div>
 </template>
@@ -34,6 +56,7 @@ import axios from "axios";
 export default {
   data: function () {
     return {
+      displayRoom: false,
       gotoCreation: false,
       info: null,
       password: null,
@@ -73,9 +96,11 @@ export default {
       } else {
         await axios.post("/api/roomList", { roomId: null, playerNumber: null });
       }
+      this.$router.push(`/play/${this.password}`);
     },
     async GetRoomList() {
       this.roomList = (await axios.get("/api/roomList")).data;
+      await axios.post("/api/roomList", { roomId: null, playerNumber: null });
     },
   },
 
@@ -114,6 +139,12 @@ export default {
 
 .txtBlack {
   color: black;
+}
+
+.txtRoom {
+  color: black;
+  font-size: 18px;
+  text-align: center;
 }
 
 .txtRed {
