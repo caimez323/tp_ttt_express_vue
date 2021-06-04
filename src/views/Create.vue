@@ -4,7 +4,7 @@
     <br />
     <br />
     <h1 class="txtBlack">
-      Click on the button to create your game and invite your friends !
+      Click on the button to create your game and invite a friend !
     </h1>
     <button
       class="buttonBlack"
@@ -32,11 +32,7 @@
       <template v-for="(val, key) in roomList.length">
         <li :key="key" class="txtRoom">
           Room n°{{ roomList[key].roomId }} :
-          <a
-            :key="key + 0.5"
-            v-bind:href="
-              'http://mega-ttt.herokuapp.com/play/' + roomList[key].roomId
-            "
+          <a :key="key + 0.5" v-bind:href="'/play/' + roomList[key].roomId"
             >Join it</a
           >
         </li>

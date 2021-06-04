@@ -24,9 +24,7 @@
     </p>
     <p class="txtBlack" v-if="isPlaying && gameExist">
       <strong>Share this link : </strong>
-      <a v-bind:href="'http://mega-ttt.herokuapp.com/play/' + this.password"
-        >Copy me !</a
-      >
+      <a v-bind:href="url">Copy me !</a>
     </p>
     <p class="txtBlack" v-if="isPlaying && gameExist">
       Room <strong># {{ password }}</strong>
@@ -289,6 +287,9 @@ export default {
     },
     gameExist() {
       return this.gameAt !== undefined && this.gameAt !== null;
+    },
+    url() {
+      return window.location.href;
     },
   },
 };
