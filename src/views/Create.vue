@@ -49,7 +49,6 @@
 </template>
 
 <script>
-import axios from "axios";
 export default {
   data: function () {
     return {
@@ -61,31 +60,29 @@ export default {
   methods: {
     async NewRoom() {
       this.GetRoomList();
-      let retry = true;
       let tmp;
+      const generateId = () => Math.floor(Math.random() * this.MAX_ROOM) + 1;
       //if there is no room empty, send a server a try to delete one
       if (this.roomRemain) {
         do {
-          retry = false;
-          tmp = Math.floor(Math.random() * this.MAX_ROOM) + 1;
-          retry = this.$store.getters.getAllRooms.some(
-            (room) => room.roomId === tmp
-          );
-        } while (retry);
+          tmp = generateId();
+        } while (
+          this.$store.getters.getAllRooms.some((room) => room.roomId === tmp)
+        );
+
         this.$store.commit("CHANGE_PASSWORD", tmp);
-        this.$store.dispatch("CREATE_EMPTY_ROOM_PASS");
-        this.$store.dispatch("CREATE_EMPTY_GAME_PASS");
+        await this.$store.dispatch("CREATE_EMPTY_ROOM_PASS");
+        await this.$store.dispatch("CREATE_EMPTY_GAME_PASS");
+        await this.$store.dispatch("REFRESH_ROOM_LIST");
+        await this.$store.dispatch("REFRESH_ACT_GAME");
         this.$router.push(`/play/${this.$store.getters.getPassword}`);
       } else {
         this.$store.dispatch("TRY_DELETE_ROOM");
       }
     },
     async GetRoomList() {
-      this.$store.commit(
-        "CHANGE_ALL_ROOMS",
-        (await axios.get("/api/roomList")).data
-      );
-      this.$store.dispatch("TRY_DELETE_ROOM");
+      await this.$store.dispatch("REFRESH_ROOM_LIST");
+      await this.$store.dispatch("TRY_DELETE_ROOM");
     },
   },
   computed: {
@@ -107,7 +104,6 @@ export default {
   display: inline-block;
   font-size: 16px;
   margin: 4px 2px;
-  -webkit-transition-duration: 0.4s; //Safari
   transition-duration: 0.4s;
   cursor: pointer;
 }

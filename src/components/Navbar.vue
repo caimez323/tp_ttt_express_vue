@@ -3,7 +3,6 @@
     <ul>
       <li><router-link to="/">Home</router-link></li>
       <li><router-link to="/create">Create a new game</router-link></li>
-      <li><router-link to="/play">Play</router-link></li>
     </ul>
   </nav>
 </template>

@@ -1,7 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
-
+import game from "../views/Play.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -19,6 +19,12 @@ const routes = [
     path: "/play",
     name: "Play",
     component: () => import("../views/Play.vue"),
+  },
+  // router
+  {
+    path: "/play/:password",
+    component: game,
+    props: (route) => ({ password: Number(route.params.password) }),
   },
 ];
 

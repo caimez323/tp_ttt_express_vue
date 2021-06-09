@@ -1,5 +1,333 @@
 <template>
   <div class="play">
-    <h1>This is the main game page</h1>
+    <br />
+    <h1 class="txtBlack" v-if="win !== 0 && isPlaying">{{ winString }}</h1>
+    <h1 class="txtBlack" v-if="gridFull">Draw !</h1>
+    <p class="txtRed" v-if="!gameExist && isPlaying">
+      This game doesn't exist.
+    </p>
+    <p class="txtBlack" v-if="isPlaying && gameExist">
+      <strong>Share this link : </strong>
+      <a v-bind:href="url">Copy me !</a>
+    </p>
+    <p class="txtBlack" v-if="isPlaying && gameExist">
+      Room <strong># {{ password }}</strong>
+    </p>
+    <!-- <h1 v-if="win !== 0">{{ winString }}</h1> -->
+    <template v-if="this.gameExist">
+      <template v-for="(val, key) in valButton">
+        <button
+          v-on:click="
+            PlayThisCell(key);
+            ActDisplay();
+          "
+          :class="isCross[key] ? 'cross' : isCircle[key] ? 'circle' : 'inv'"
+          :key="key"
+        >
+          <img
+            v-if="
+              $store.getters.getActGame != null &&
+              $store.getters.getActGame.grid[key].display == 1
+            "
+            class="picture"
+            src="../assets/cross.png"
+          />
+          <img
+            v-if="
+              $store.getters.getActGame != null &&
+              $store.getters.getActGame.grid[key].display == 2
+            "
+            class="picture"
+            src="../assets/round.png"
+          />
+        </button>
+        <br :key="key + 0.5" v-if="(key + 1) % 3 == 0" />
+      </template>
+    </template>
   </div>
 </template>
+
+<script>
+export default {
+  props: { password: Number },
+  data: function () {
+    return {
+      attribut: "href",
+      nIntervId: null,
+      win: 0,
+      winString: "",
+      valButton: [
+        { content: 0 },
+        { content: 1 },
+        { content: 2 },
+        { content: 3 },
+        { content: 4 },
+        { content: 5 },
+        { content: 6 },
+        { content: 7 },
+        { content: 8 },
+      ],
+    };
+  },
+  methods: {
+    async PlayThisCell(numCell) {
+      //Send the action to the server
+      await this.$store.dispatch("REFRESH_ROOM_LIST");
+      const index = this.$store.getters.getAllRooms.findIndex(
+        (room) => room.roomId === this.$store.getters.getPassword
+      );
+      if (
+        this.win === 0 &&
+        this.$store.getters.getAllRooms[index].prevPlayer !==
+          this.$store.getters.getPlayer &&
+        this.gameExist &&
+        this.$store.getters.getActGame.grid[numCell].state === 0 &&
+        this.$store.getters.getPlayer !== null
+      ) {
+        await this.$store.dispatch("PLAY_A_CELL", numCell);
+      }
+    },
+    async ActDisplay() {
+      if (this.win === 0) {
+        await this.$store.dispatch("REFRESH_ACT_GAME");
+        this.isWin(this.$store.getters.getActGame);
+        if (this.gridFull && this.win === 0) {
+          this.StopDisplay();
+        }
+      }
+      if (!this.gameExist) {
+        this.StopDisplay();
+      }
+      if (this.win !== 0 || this.gridFull) {
+        this.$store.dispatch("AFTER_PLAY");
+      }
+    },
+    ChangeDisplay() {
+      this.nIntervId = setInterval(this.ActDisplay, 1000);
+    },
+    StopDisplay() {
+      clearInterval(this.nIntervId);
+    },
+    async isWin(game) {
+      // called each play
+      if (this.gameExist) {
+        const gameGrid = game.grid;
+        let preWin = 0;
+        if (gameGrid[0].state === 1) {
+          // first two possibilites of winning
+          let display = gameGrid[0].display;
+          if (
+            gameGrid[1].display === display &&
+            gameGrid[2].display === display
+          ) {
+            preWin = 1;
+          } else if (
+            gameGrid[3].display === display &&
+            gameGrid[6].display === display
+          ) {
+            preWin = 1;
+          }
+        }
+        if (gameGrid[8].state === 1) {
+          // last two possiblities of winning
+          let display = gameGrid[8].display;
+          if (
+            gameGrid[2].display === display &&
+            gameGrid[5].display === display
+          ) {
+            preWin = 3;
+          } else if (
+            gameGrid[6].display === display &&
+            gameGrid[7].display === display
+          ) {
+            preWin = 3;
+          }
+        }
+        if (gameGrid[4].state === 1) {
+          // We need to check the mid-vertical and the mid-horizontal then the diagonals
+          let display = gameGrid[4].display;
+          if (
+            gameGrid[1].display === display &&
+            gameGrid[7].display === display
+          ) {
+            //mid vertical
+            preWin = 2;
+          } else if (
+            gameGrid[3].display === display &&
+            gameGrid[5].display === display
+          ) {
+            //mid horizontal
+            preWin = 2;
+          } else if (
+            gameGrid[0].display === display &&
+            gameGrid[8].display === display
+          ) {
+            //diago up left
+            preWin = 2;
+          } else if (
+            gameGrid[2].display === display &&
+            gameGrid[6].display === display
+          ) {
+            //diago up right
+            preWin = 2;
+          }
+        }
+        switch (preWin) {
+          case 1:
+            this.win = gameGrid[0].display;
+            break;
+          case 2:
+            this.win = gameGrid[4].display;
+            break;
+          case 3:
+            this.win = gameGrid[8].display;
+            break;
+        }
+        //Stop then display message if win
+        if (this.win !== 0) {
+          this.StopDisplay();
+          this.winString = "The winner is ";
+          if (this.win === 1) {
+            this.winString = this.winString + "player 1 (cross)";
+          } else if (this.win === 2) {
+            this.winString = this.winString + "player 2 (circle)";
+          }
+        }
+      }
+    },
+    async GivePlayer() {
+      if (this.isPlaying) {
+        await this.$store.dispatch("REFRESH_ROOM_LIST");
+        const found = this.$store.getters.getAllRooms.find(
+          (room) => room.roomId === this.$store.getters.getPassword
+        );
+        console.log(found);
+        if (found !== undefined && found.playerNumber < 2) {
+          await this.$store.dispatch("GIVE_PLAYER", found.playerNumber);
+        } else {
+          window.alert(
+            "This game is full.\nYou can still watch it as a spectator."
+          );
+        }
+      }
+    },
+    cellToBool(condition) {
+      if (this.gameExist) {
+        let cellTab = this.$store.getters.getActGame.grid;
+        cellTab = cellTab.map((x) => x.display === condition);
+        return cellTab;
+      }
+    },
+  },
+  mounted() {
+    this.$store.commit("CHANGE_PASSWORD", this.password);
+    this.$store.dispatch("REFRESH_ACT_GAME");
+    this.ChangeDisplay();
+    this.GivePlayer();
+  },
+  computed: {
+    isPlaying() {
+      return this.$store.getters.getPassword !== null;
+    },
+    isCross() {
+      return this.cellToBool(1);
+    },
+    isCircle() {
+      return this.cellToBool(2);
+    },
+    gameExist() {
+      return (
+        this.$store.getters.getActGame !== undefined &&
+        this.$store.getters.getActGame !== null
+      );
+    },
+    url() {
+      return window.location.href;
+    },
+    gridFull() {
+      return (
+        this.gameExist &&
+        this.$store.getters.getActGame.grid.every((cell) => cell.state == 1)
+      );
+    },
+  },
+  beforeDestroy() {
+    this.StopDisplay();
+  },
+};
+</script>
+
+<style lang="scss">
+.txtRed {
+  color: rgb(146, 5, 5);
+  font-size: 20px;
+}
+.inv {
+  border: none;
+  padding: 128px 128px;
+  font-size: 10rem;
+  text-align: center;
+  color: white;
+  border-radius: 0px;
+  border: 1px solid rgb(0, 0, 0);
+  background-color: rgb(255, 255, 255);
+}
+.inv:hover {
+  background-color: rgb(210, 210, 210);
+}
+.picture {
+  width: 242px;
+  border: none;
+  position: relative;
+  vertical-align: 0px;
+  margin-top: 0px;
+}
+.txtBlack {
+  color: black;
+}
+.buttonBlack2 {
+  background-color: white;
+  border: 2px solid #555555;
+  color: black;
+  padding: 3px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; //Safari
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+.buttonBlack2:hover {
+  background-color: #555555;
+  color: white;
+}
+.buttonBlack2:active {
+  transform: translateY(4px);
+}
+.txtField {
+  width: 10%;
+  height: 23px;
+}
+.cross {
+  vertical-align: -119.5px;
+  height: 258px;
+  width: 258px;
+  background-color: white;
+  color: white;
+}
+.cross:hover {
+  cursor: not-allowed;
+}
+.circle {
+  vertical-align: -119.5px;
+  height: 258px;
+  width: 258px;
+  background-color: white;
+  color: white;
+}
+.circle:hover {
+  cursor: not-allowed;
+}
+</style>
