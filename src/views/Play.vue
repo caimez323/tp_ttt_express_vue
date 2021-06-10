@@ -52,7 +52,6 @@ export default {
   props: { password: Number },
   data: function () {
     return {
-      attribut: "href",
       nIntervId: null,
       win: 0,
       winString: "",
@@ -201,7 +200,6 @@ export default {
         const found = this.$store.getters.getAllRooms.find(
           (room) => room.roomId === this.$store.getters.getPassword
         );
-        console.log(found);
         if (found !== undefined && found.playerNumber < 2) {
           await this.$store.dispatch("GIVE_PLAYER", found.playerNumber);
         } else {
@@ -253,6 +251,8 @@ export default {
   },
   beforeDestroy() {
     this.StopDisplay();
+    if (this.$store.getters.getPlayer != null)
+      this.$store.dispatch("ADD_LEAVER");
   },
 };
 </script>

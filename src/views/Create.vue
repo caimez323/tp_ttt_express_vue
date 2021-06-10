@@ -53,41 +53,29 @@ export default {
   data: function () {
     return {
       displayRoom: false,
-      MAX_ROOM: 100000,
       afterCreation: false,
     };
   },
   methods: {
     async NewRoom() {
       this.GetRoomList();
-      let tmp;
-      const generateId = () => Math.floor(Math.random() * this.MAX_ROOM) + 1;
-      //if there is no room empty, send a server a try to delete one
       if (this.roomRemain) {
-        do {
-          tmp = generateId();
-        } while (
-          this.$store.getters.getAllRooms.some((room) => room.roomId === tmp)
-        );
-
-        this.$store.commit("CHANGE_PASSWORD", tmp);
-        await this.$store.dispatch("CREATE_EMPTY_ROOM_PASS");
-        await this.$store.dispatch("CREATE_EMPTY_GAME_PASS");
-        await this.$store.dispatch("REFRESH_ROOM_LIST");
-        await this.$store.dispatch("REFRESH_ACT_GAME");
+        await this.$store.dispatch("CREATE_NEW_ROOM");
         this.$router.push(`/play/${this.$store.getters.getPassword}`);
       } else {
         this.$store.dispatch("TRY_DELETE_ROOM");
       }
     },
     async GetRoomList() {
-      await this.$store.dispatch("REFRESH_ROOM_LIST");
       await this.$store.dispatch("TRY_DELETE_ROOM");
+      await this.$store.dispatch("REFRESH_ROOM_LIST");
     },
   },
   computed: {
     roomRemain() {
-      return this.$store.getters.getAllRooms.length < this.MAX_ROOM - 10;
+      return (
+        this.$store.getters.getAllRooms.length < this.$store.state.MAX_ROOM - 10
+      );
     },
   },
 };
