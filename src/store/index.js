@@ -99,6 +99,5 @@ export default new Vuex.Store({
     getActGame: (state) => state.gameAct,
     getPlayer: (state) => state.player,
     getMAX_ROOM: (state) => state.MAX_ROOM,
-    getLeavers: (state) => state.leavers,
   },
 });

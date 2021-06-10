@@ -31,7 +31,7 @@ app.listen(port, () => {
 });
 
 //data
-const state = { empty: 0, full: 1 };
+const STATE = { EMPTY: 0, FULL: 1 };
 class Game {
   constructor(id, grid) {
     this.id = id;
@@ -53,6 +53,8 @@ router.post("/roomList", async (req, res) => {
   try {
     const room = req.body;
     if (room.roomId === null || room.roomId === undefined)
+      res.status(400).send();
+    if (RoomList.some((anyRoom) => anyRoom.roomId === room.roomId))
       res.status(400).send();
     const newRoom = new Room(room.roomId, room.playerNumber, 0, 0);
     RoomList.push(newRoom);
@@ -111,7 +113,7 @@ router.post("/addPlayer", async (req, res) => {
     const modifRoom = req.body;
     const found = RoomList.find((room) => room.roomId === modifRoom.id);
     if (
-      found == undefined ||
+      found === undefined ||
       (modifRoom.payloadPlayer !== 1 && modifRoom.payloadPlayer !== 2)
     )
       res.status(404).send;
@@ -126,18 +128,18 @@ router.post("/addPlayer", async (req, res) => {
 router.post("/gamePlay", async (req, res) => {
   try {
     const mouv = req.body;
-    const indexG = GameList.findIndex((game) => game.id === mouv.id);
-    const indexR = RoomList.findIndex((rooms) => rooms.roomId === mouv.id);
-    if (indexG == undefined || indexR == undefined) res.status(404).send();
+    const gameAt = GameList.find((game) => game.id === mouv.id);
+    const roomAt = RoomList.find((rooms) => rooms.roomId === mouv.id);
+    if (gameAt == undefined || roomAt == undefined) res.status(404).send();
     if (
       (mouv.payloadPlayer !== 1 && mouv.payloadPlayer !== 2) ||
       (mouv.cell < 0 && mouv.cell > 8)
     )
-      res.status(406).send();
-    if (RoomList[indexR].prevPlayer !== mouv.payloadPlayer) {
-      GameList[indexG].grid[mouv.cell].state = state.full;
-      GameList[indexG].grid[mouv.cell].display = mouv.payloadPlayer;
-      RoomList[indexR].prevPlayer = mouv.payloadPlayer;
+      res.status(401).send();
+    if (roomAt.prevPlayer !== mouv.payloadPlayer) {
+      gameAt.grid[mouv.cell].state = STATE.FULL;
+      gameAt.grid[mouv.cell].display = mouv.payloadPlayer;
+      roomAt.prevPlayer = mouv.payloadPlayer;
       res.send(200);
     } else {
       res.status(401).send();
@@ -151,25 +153,12 @@ router.post("/gamePlay", async (req, res) => {
 router.post("/remove", async (req, res) => {
   try {
     const { id } = req.body;
-    if (id == undefined) res.status(400).send();
+    if (id === undefined) res.status(400).send();
     let gameAt = GameList.find((game) => game.id === id);
     let roomAt = RoomList.find((room) => room.roomId === id);
-    if (gameAt == undefined || roomAt == undefined) res.status(404).send();
+    if (gameAt === undefined || roomAt === undefined) res.status(404).send();
     roomAt.playerNumber = null;
     res.send(200);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send();
-  }
-});
-
-router.post("/leavers", async (req, res) => {
-  try {
-    const { id } = req.body;
-    if (id == undefined) res.status(400).send();
-    let roomAt = RoomList.find((room) => room.roomId === id);
-    if (roomAt == undefined) res.status(404).send();
-    res.send(roomAt.leaver);
   } catch (err) {
     console.error(err);
     res.status(500).send();
@@ -179,9 +168,9 @@ router.post("/leavers", async (req, res) => {
 router.post("/addLeaver", async (req, res) => {
   try {
     const { id } = req.body;
-    if (id == undefined) res.status(400).send();
+    if (id === undefined) res.status(400).send();
     let roomAt = RoomList.find((room) => room.roomId === id);
-    if (roomAt == undefined) res.status(404).send();
+    if (roomAt === undefined) res.status(404).send();
     roomAt.leaver += 1;
     res.status(200).send();
   } catch (err) {
