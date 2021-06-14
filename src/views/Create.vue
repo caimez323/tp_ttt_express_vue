@@ -31,12 +31,12 @@
 
     <div v-if="displayRoom">
       <p class="txtBlack">List of rooms :</p>
-      <template v-for="(val, key) in $store.getters.getAllRooms">
+      <template v-for="(val, key) in $store.getters.getAllRooms.length">
         <li :key="key" class="txtRoom">
-          Room n°{{ $store.getters.getAllRooms[key].roomId }} :
+          Room n°{{ $store.getters.getAllRooms[key] }} :
           <a
             :key="key + 0.5"
-            v-bind:href="'/play/' + $store.getters.getAllRooms[key].roomId"
+            v-bind:href="'/play/' + $store.getters.getAllRooms[key]"
             >Join it</a
           >
         </li>

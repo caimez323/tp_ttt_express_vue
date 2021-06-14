@@ -72,13 +72,10 @@ export default {
     async PlayThisCell(numCell) {
       //Send the action to the server
       await this.$store.dispatch("REFRESH_ROOM_LIST");
-      const index = this.$store.getters.getAllRooms.findIndex(
-        (room) => room.roomId === this.$store.getters.getPassword
-      );
       if (
         this.win === 0 &&
-        this.$store.getters.getAllRooms[index].prevPlayer !==
-          this.$store.getters.getPlayer &&
+        //this.$store.getters.getAllRooms[this.$store.getters.getPassword].prevPlayer !==
+        //this.$store.getters.getPlayer &&
         this.gameExist &&
         this.$store.getters.getActGame.grid[numCell].state === 0 &&
         this.$store.getters.getPlayer !== null
@@ -196,17 +193,7 @@ export default {
     },
     async GivePlayer() {
       if (this.isPlaying) {
-        await this.$store.dispatch("REFRESH_ROOM_LIST");
-        const found = this.$store.getters.getAllRooms.find(
-          (room) => room.roomId === this.$store.getters.getPassword
-        );
-        if (found !== undefined && found.playerNumber < 2) {
-          await this.$store.dispatch("GIVE_PLAYER", found.playerNumber);
-        } else {
-          window.alert(
-            "This game is full.\nYou can still watch it as a spectator."
-          );
-        }
+        await this.$store.dispatch("GIVE_PLAYER");
       }
     },
     cellToBool(condition) {

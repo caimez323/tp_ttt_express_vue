@@ -57,13 +57,17 @@ export default new Vuex.Store({
     async REFRESH_ROOM_LIST(state) {
       state.commit("CHANGE_ALL_ROOMS", (await axios.get("/api/roomList")).data);
     },
-    async GIVE_PLAYER(state, playerPresent) {
-      state.commit("CHANGE_PLAYER", playerPresent + 1);
-      let payload = {
-        id: this.getters.getPassword,
-        payloadPlayer: this.getters.getPlayer,
-      };
-      axios.post("/api/addPlayer", payload);
+    async GIVE_PLAYER(state) {
+      const resp = (
+        await axios.post("/api/addPlayer", { id: this.getters.getPassword })
+      ).data;
+      if (resp.resp === false) {
+        window.alert(
+          "This game is full.\nYou can still watch it as a spectator."
+        );
+      } else {
+        state.commit("CHANGE_PLAYER", resp.resp);
+      }
     },
     async PLAY_A_CELL(state, numCell) {
       let payload = {
@@ -82,7 +86,7 @@ export default new Vuex.Store({
         Math.floor(Math.random() * this.getters.getMAX_ROOM) + 1;
       do {
         tmp = generateId();
-      } while (this.getters.getAllRooms.some((room) => room.roomId === tmp));
+      } while (this.getters.getAllRooms.some((id) => id === tmp));
       state.commit("CHANGE_PASSWORD", tmp);
       await state.dispatch("CREATE_EMPTY_GAME_AND_ROOM");
       await state.dispatch("REFRESH_ROOM_LIST");
@@ -99,5 +103,6 @@ export default new Vuex.Store({
     getActGame: (state) => state.gameAct,
     getPlayer: (state) => state.player,
     getMAX_ROOM: (state) => state.MAX_ROOM,
+    getRoomListMap: (state) => state.roomListMap,
   },
 });
