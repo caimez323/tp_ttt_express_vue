@@ -32,56 +32,13 @@ app.listen(port, () => {
 
 //data
 const STATE = { EMPTY: 0, FULL: 1 };
-let GameList = new Map();
 let RoomList = new Map();
 let toDelete = [];
-
-router.post("/roomList", async (req, res) => {
-  try {
-    const room = req.body;
-
-    if (room.roomId === null || room.roomId === undefined)
-      res.status(400).send();
-    if (RoomList.has(room.roomId)) res.status(400).send();
-    RoomList.set(room.roomId, {
-      roomId: room.roomId,
-      playerNumber: room.playerNumber,
-      prevPlayer: 0,
-      leaver: 0,
-    });
-    if (room.playerNumber === null || room.leaver === 2)
-      toDelete.push(room.roomId);
-    //TODO change the for for other thing
-    for (let index = 0; index < toDelete.length; index++) {
-      RoomList.delete(toDelete[index]);
-      GameList.delete(toDelete[index]);
-    }
-    toDelete = [];
-    res.send(200);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send();
-  }
-});
+const MAX_ROOM = 100000;
 
 router.get("/roomList", async (req, res) => {
   try {
     res.send(Array.from(RoomList.keys()));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send();
-  }
-});
-
-router.post("/gameList", async (req, res) => {
-  try {
-    const game = req.body;
-    if (game.grid.length !== 9 || game.id === undefined || game.id === null)
-      res.status(400).send();
-    GameList.set(game.id, { id: game.id, grid: game.grid });
-    // const newGame = new Game(game.id, game.grid);
-    // GameList.push(newGame);
-    res.status(200).send();
   } catch (err) {
     console.error(err);
     res.status(500).send();
@@ -93,10 +50,10 @@ router.post("/certainGame", async (req, res) => {
     const { id } = req.body;
     if (id == undefined) res.status(400).send();
 
-    const game = GameList.get(id);
-    if (game == undefined) res.status(404).send();
+    const room = RoomList.get(id);
+    if (room == undefined) res.status(404).send();
 
-    res.send(game);
+    res.send(room);
   } catch (err) {
     console.error(err);
     res.status(500).send();
@@ -125,17 +82,16 @@ router.post("/addPlayer", async (req, res) => {
 router.post("/gamePlay", async (req, res) => {
   try {
     const mouv = req.body;
-    const gameAt = GameList.get(mouv.id);
     const roomAt = RoomList.get(mouv.id);
-    if (gameAt == undefined || roomAt == undefined) res.status(404).send();
+    if (roomAt == undefined) res.status(404).send();
     if (
       (mouv.payloadPlayer !== 1 && mouv.payloadPlayer !== 2) ||
       (mouv.cell < 0 && mouv.cell > 8)
     )
       res.status(401).send();
     if (roomAt.prevPlayer !== mouv.payloadPlayer) {
-      gameAt.grid[mouv.cell].state = STATE.FULL;
-      gameAt.grid[mouv.cell].display = mouv.payloadPlayer;
+      roomAt.grid[mouv.cell].state = STATE.FULL;
+      roomAt.grid[mouv.cell].display = mouv.payloadPlayer;
       roomAt.prevPlayer = mouv.payloadPlayer;
       res.send(200);
     } else {
@@ -151,9 +107,8 @@ router.post("/remove", async (req, res) => {
   try {
     const { id } = req.body;
     if (id === undefined) res.status(400).send();
-    let gameAt = GameList.get(id);
     let roomAt = RoomList.get(id);
-    if (gameAt === undefined || roomAt === undefined) res.status(404).send();
+    if (roomAt === undefined) res.status(404).send();
     toDelete.push(id);
     res.send(200);
   } catch (err) {
@@ -177,9 +132,49 @@ router.post("/addLeaver", async (req, res) => {
   }
 });
 
-router.get("/roomListMap", async (req, res) => {
+router.post("/createRoom", async (req, res) => {
   try {
-    res.send(RoomList);
+    const roomListKeys = Array.from(RoomList.keys());
+    let tmpId;
+    const generateId = () => Math.floor(Math.random() * MAX_ROOM) + 1;
+    do {
+      tmpId = generateId();
+    } while (roomListKeys.some((id) => id === tmpId));
+    RoomList.set(tmpId, {
+      roomId: tmpId,
+      playerNumber: 0,
+      prevPlayer: 0,
+      leaver: 0,
+      grid: [
+        { state: 0, display: 0 },
+        { state: 0, display: 0 },
+        { state: 0, display: 0 },
+        { state: 0, display: 0 },
+        { state: 0, display: 0 },
+        { state: 0, display: 0 },
+        { state: 0, display: 0 },
+        { state: 0, display: 0 },
+        { state: 0, display: 0 },
+      ],
+    });
+    for (let index = 0; index < toDelete.length; index++) {
+      RoomList.delete(toDelete[index]);
+    }
+    toDelete = [];
+
+    res.send({ id: tmpId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send();
+  }
+});
+
+router.post("/delete", async (req, res) => {
+  try {
+    for (let index = 0; index < toDelete.length; index++) {
+      RoomList.delete(toDelete[index]);
+    }
+    res.status(200).send();
   } catch (err) {
     console.error(err);
     res.status(500).send();

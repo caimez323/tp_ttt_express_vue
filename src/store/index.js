@@ -8,7 +8,6 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     allRooms: [],
-    allGames: [],
     password: null,
     gameAct: null,
     player: null,
@@ -29,30 +28,14 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    async CREATE_EMPTY_GAME_AND_ROOM() {
-      let cell = {
-        state: 0,
-        display: 0,
-      };
-      let payload = {
-        id: this.getters.getPassword,
-        grid: [cell, cell, cell, cell, cell, cell, cell, cell, cell],
-      };
-      await axios.post("/api/roomList", {
-        roomId: this.getters.getPassword,
-        playerNumber: 0,
-      });
-      await axios.post("/api/gameList", payload);
-    },
-    async TRY_DELETE_ROOM() {
-      await axios.post("/api/roomList", { roomId: -1, playerNumber: null });
+    async DELETE_ROOM() {
+      await axios.post("/api/delete");
     },
     async REFRESH_ACT_GAME(state) {
       let newGameAt = await axios.post("/api/certainGame", {
         id: this.getters.getPassword,
       });
       state.commit("CHANGE_GAME_ACT", newGameAt.data);
-      //console.log(this.getters.getActGame); Refresh
     },
     async REFRESH_ROOM_LIST(state) {
       state.commit("CHANGE_ALL_ROOMS", (await axios.get("/api/roomList")).data);
@@ -81,14 +64,8 @@ export default new Vuex.Store({
       await axios.post("/api/remove", { id: this.getters.getPassword });
     },
     async CREATE_NEW_ROOM(state) {
-      let tmp;
-      const generateId = () =>
-        Math.floor(Math.random() * this.getters.getMAX_ROOM) + 1;
-      do {
-        tmp = generateId();
-      } while (this.getters.getAllRooms.some((id) => id === tmp));
+      const tmp = (await axios.post("/api/createRoom")).data.id;
       state.commit("CHANGE_PASSWORD", tmp);
-      await state.dispatch("CREATE_EMPTY_GAME_AND_ROOM");
       await state.dispatch("REFRESH_ROOM_LIST");
       await state.dispatch("REFRESH_ACT_GAME");
     },

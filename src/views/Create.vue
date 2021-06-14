@@ -10,7 +10,7 @@
     <button
       class="buttonBlack"
       v-on:click.once="
-        NewRoom();
+        newRoom();
         afterCreation = true;
       "
     >
@@ -22,7 +22,7 @@
     <button
       class="buttonBlack"
       v-on:click="
-        GetRoomList();
+        getRoomList();
         displayRoom = true;
       "
     >
@@ -57,17 +57,17 @@ export default {
     };
   },
   methods: {
-    async NewRoom() {
-      this.GetRoomList();
+    async newRoom() {
+      this.getRoomList();
       if (this.roomRemain) {
         await this.$store.dispatch("CREATE_NEW_ROOM");
         this.$router.push(`/play/${this.$store.getters.getPassword}`);
       } else {
-        this.$store.dispatch("TRY_DELETE_ROOM");
+        this.$store.dispatch("DELETE_ROOM");
       }
     },
-    async GetRoomList() {
-      await this.$store.dispatch("TRY_DELETE_ROOM");
+    async getRoomList() {
+      await this.$store.dispatch("DELETE_ROOM");
       await this.$store.dispatch("REFRESH_ROOM_LIST");
     },
   },

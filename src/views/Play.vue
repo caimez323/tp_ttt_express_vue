@@ -13,13 +13,12 @@
     <p class="txtBlack" v-if="isPlaying && gameExist">
       Room <strong># {{ password }}</strong>
     </p>
-    <!-- <h1 v-if="win !== 0">{{ winString }}</h1> -->
     <template v-if="this.gameExist">
       <template v-for="(val, key) in valButton">
         <button
           v-on:click="
-            PlayThisCell(key);
-            ActDisplay();
+            playThisCell(key);
+            actDisplay();
           "
           :class="isCross[key] ? 'cross' : isCircle[key] ? 'circle' : 'inv'"
           :key="key"
@@ -69,13 +68,11 @@ export default {
     };
   },
   methods: {
-    async PlayThisCell(numCell) {
+    async playThisCell(numCell) {
       //Send the action to the server
       await this.$store.dispatch("REFRESH_ROOM_LIST");
       if (
         this.win === 0 &&
-        //this.$store.getters.getAllRooms[this.$store.getters.getPassword].prevPlayer !==
-        //this.$store.getters.getPlayer &&
         this.gameExist &&
         this.$store.getters.getActGame.grid[numCell].state === 0 &&
         this.$store.getters.getPlayer !== null
@@ -83,25 +80,25 @@ export default {
         await this.$store.dispatch("PLAY_A_CELL", numCell);
       }
     },
-    async ActDisplay() {
+    async actDisplay() {
       if (this.win === 0) {
         await this.$store.dispatch("REFRESH_ACT_GAME");
         this.isWin(this.$store.getters.getActGame);
         if (this.gridFull && this.win === 0) {
-          this.StopDisplay();
+          this.stopDisplay();
         }
       }
       if (!this.gameExist) {
-        this.StopDisplay();
+        this.stopDisplay();
       }
       if (this.win !== 0 || this.gridFull) {
         this.$store.dispatch("AFTER_PLAY");
       }
     },
-    ChangeDisplay() {
-      this.nIntervId = setInterval(this.ActDisplay, 1000);
+    changeDisplay() {
+      this.nIntervId = setInterval(this.actDisplay, 1000);
     },
-    StopDisplay() {
+    stopDisplay() {
       clearInterval(this.nIntervId);
     },
     async isWin(game) {
@@ -181,7 +178,7 @@ export default {
         }
         //Stop then display message if win
         if (this.win !== 0) {
-          this.StopDisplay();
+          this.stopDisplay();
           this.winString = "The winner is ";
           if (this.win === 1) {
             this.winString = this.winString + "player 1 (cross)";
@@ -191,7 +188,7 @@ export default {
         }
       }
     },
-    async GivePlayer() {
+    async givePlayer() {
       if (this.isPlaying) {
         await this.$store.dispatch("GIVE_PLAYER");
       }
@@ -207,8 +204,8 @@ export default {
   mounted() {
     this.$store.commit("CHANGE_PASSWORD", this.password);
     this.$store.dispatch("REFRESH_ACT_GAME");
-    this.ChangeDisplay();
-    this.GivePlayer();
+    this.changeDisplay();
+    this.givePlayer();
   },
   computed: {
     isPlaying() {
@@ -237,7 +234,7 @@ export default {
     },
   },
   beforeDestroy() {
-    this.StopDisplay();
+    this.stopDisplay();
     if (this.$store.getters.getPlayer != null)
       this.$store.dispatch("ADD_LEAVER");
   },
@@ -282,7 +279,6 @@ export default {
   display: inline-block;
   font-size: 16px;
   margin: 4px 2px;
-  -webkit-transition-duration: 0.4s; //Safari
   transition-duration: 0.4s;
   cursor: pointer;
 }
@@ -298,7 +294,7 @@ export default {
   height: 23px;
 }
 .cross {
-  vertical-align: -119.5px;
+  vertical-align: -119px;
   height: 258px;
   width: 258px;
   background-color: white;
@@ -308,7 +304,7 @@ export default {
   cursor: not-allowed;
 }
 .circle {
-  vertical-align: -119.5px;
+  vertical-align: -119px;
   height: 258px;
   width: 258px;
   background-color: white;
