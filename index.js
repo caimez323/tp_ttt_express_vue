@@ -157,9 +157,7 @@ router.post("/createRoom", async (req, res) => {
         { state: 0, display: 0 },
       ],
     });
-    for (let index = 0; index < toDelete.length; index++) {
-      RoomList.delete(toDelete[index]);
-    }
+    toDelete.forEach((element) => RoomList.delete(element));
     toDelete = [];
 
     res.send({ id: tmpId });
@@ -171,9 +169,7 @@ router.post("/createRoom", async (req, res) => {
 
 router.post("/delete", async (req, res) => {
   try {
-    for (let index = 0; index < toDelete.length; index++) {
-      RoomList.delete(toDelete[index]);
-    }
+    toDelete.forEach((element) => RoomList.delete(element));
     res.status(200).send();
   } catch (err) {
     console.error(err);

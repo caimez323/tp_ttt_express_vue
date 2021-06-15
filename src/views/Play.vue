@@ -1,7 +1,7 @@
 <template>
   <div class="play">
     <br />
-    <h1 class="txtBlack" v-if="win !== 0 && isPlaying">{{ winString }}</h1>
+    <h1 class="txtBlack" v-if="isWin && isPlaying">{{ winString }}</h1>
     <h1 class="txtBlack" v-if="gridFull">Draw !</h1>
     <p class="txtRed" v-if="!gameExist && isPlaying">
       This game doesn't exist.
@@ -14,7 +14,7 @@
       Room <strong># {{ password }}</strong>
     </p>
     <template v-if="this.gameExist">
-      <template v-for="(val, key) in valButton">
+      <template v-for="(val, key) in this.$store.getters.getActGame.grid">
         <button
           v-on:click="
             playThisCell(key);
@@ -54,17 +54,6 @@ export default {
       nIntervId: null,
       win: 0,
       winString: "",
-      valButton: [
-        { content: 0 },
-        { content: 1 },
-        { content: 2 },
-        { content: 3 },
-        { content: 4 },
-        { content: 5 },
-        { content: 6 },
-        { content: 7 },
-        { content: 8 },
-      ],
     };
   },
   methods: {
@@ -81,17 +70,22 @@ export default {
       }
     },
     async actDisplay() {
-      if (this.win === 0) {
+      if (!this.isWin) {
         await this.$store.dispatch("REFRESH_ACT_GAME");
-        this.isWin(this.$store.getters.getActGame);
-        if (this.gridFull && this.win === 0) {
+        if (this.gridFull) {
           this.stopDisplay();
         }
       }
       if (!this.gameExist) {
         this.stopDisplay();
       }
-      if (this.win !== 0 || this.gridFull) {
+      if (this.isWin || this.gridFull) {
+        if (this.$store.getters.getWinner === 1) {
+          this.winString = "The winner is player 1 (cross)";
+        } else {
+          this.winString = "The winner is player 2 (circle)";
+        }
+        this.stopDisplay();
         this.$store.dispatch("AFTER_PLAY");
       }
     },
@@ -100,93 +94,6 @@ export default {
     },
     stopDisplay() {
       clearInterval(this.nIntervId);
-    },
-    async isWin(game) {
-      // called each play
-      if (this.gameExist) {
-        const gameGrid = game.grid;
-        let preWin = 0;
-        if (gameGrid[0].state === 1) {
-          // first two possibilites of winning
-          let display = gameGrid[0].display;
-          if (
-            gameGrid[1].display === display &&
-            gameGrid[2].display === display
-          ) {
-            preWin = 1;
-          } else if (
-            gameGrid[3].display === display &&
-            gameGrid[6].display === display
-          ) {
-            preWin = 1;
-          }
-        }
-        if (gameGrid[8].state === 1) {
-          // last two possiblities of winning
-          let display = gameGrid[8].display;
-          if (
-            gameGrid[2].display === display &&
-            gameGrid[5].display === display
-          ) {
-            preWin = 3;
-          } else if (
-            gameGrid[6].display === display &&
-            gameGrid[7].display === display
-          ) {
-            preWin = 3;
-          }
-        }
-        if (gameGrid[4].state === 1) {
-          // We need to check the mid-vertical and the mid-horizontal then the diagonals
-          let display = gameGrid[4].display;
-          if (
-            gameGrid[1].display === display &&
-            gameGrid[7].display === display
-          ) {
-            //mid vertical
-            preWin = 2;
-          } else if (
-            gameGrid[3].display === display &&
-            gameGrid[5].display === display
-          ) {
-            //mid horizontal
-            preWin = 2;
-          } else if (
-            gameGrid[0].display === display &&
-            gameGrid[8].display === display
-          ) {
-            //diago up left
-            preWin = 2;
-          } else if (
-            gameGrid[2].display === display &&
-            gameGrid[6].display === display
-          ) {
-            //diago up right
-            preWin = 2;
-          }
-        }
-        switch (preWin) {
-          case 1:
-            this.win = gameGrid[0].display;
-            break;
-          case 2:
-            this.win = gameGrid[4].display;
-            break;
-          case 3:
-            this.win = gameGrid[8].display;
-            break;
-        }
-        //Stop then display message if win
-        if (this.win !== 0) {
-          this.stopDisplay();
-          this.winString = "The winner is ";
-          if (this.win === 1) {
-            this.winString = this.winString + "player 1 (cross)";
-          } else if (this.win === 2) {
-            this.winString = this.winString + "player 2 (circle)";
-          }
-        }
-      }
     },
     async givePlayer() {
       if (this.isPlaying) {
@@ -231,6 +138,14 @@ export default {
         this.gameExist &&
         this.$store.getters.getActGame.grid.every((cell) => cell.state == 1)
       );
+    },
+    isWin() {
+      if (this.gameExist) {
+        if (this.$store.getters.getWinner !== 0) {
+          return true;
+        }
+      }
+      return false;
     },
   },
   beforeDestroy() {
@@ -294,7 +209,7 @@ export default {
   height: 23px;
 }
 .cross {
-  vertical-align: -119px;
+  vertical-align: -119.5px;
   height: 258px;
   width: 258px;
   background-color: white;
@@ -304,7 +219,7 @@ export default {
   cursor: not-allowed;
 }
 .circle {
-  vertical-align: -119px;
+  vertical-align: -119.5px;
   height: 258px;
   width: 258px;
   background-color: white;

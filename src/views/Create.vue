@@ -42,8 +42,8 @@
         </li>
       </template>
     </div>
-    <p class="txtRed" v-if="afterCreation && !roomRemain && !displayRoom">
-      <strong>There are currently no room available. Please try again !</strong>
+    <p class="txtRed" v-if="!roomRemain && !displayRoom">
+      <strong>There are currently no room available. Please try later</strong>
     </p>
   </div>
 </template>
@@ -53,7 +53,6 @@ export default {
   data: function () {
     return {
       displayRoom: false,
-      afterCreation: false,
     };
   },
   methods: {
