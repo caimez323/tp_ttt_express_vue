@@ -1,6 +1,6 @@
 <template>
   <div class="play">
-    <br />
+    <br v-if="!isWin" />
     <h1 class="txtBlack" v-if="isWin && isPlaying">{{ winString }}</h1>
     <h1 class="txtBlack" v-if="gridFull">Draw !</h1>
     <p class="txtRed" v-if="!gameExist && isPlaying">
@@ -52,8 +52,6 @@ export default {
   data: function () {
     return {
       nIntervId: null,
-      win: 0,
-      winString: "",
     };
   },
   methods: {
@@ -61,7 +59,7 @@ export default {
       //Send the action to the server
       await this.$store.dispatch("REFRESH_ROOM_LIST");
       if (
-        this.win === 0 &&
+        !this.isWinwin &&
         this.gameExist &&
         this.$store.getters.getActGame.grid[numCell].state === 0 &&
         this.$store.getters.getPlayer !== null
@@ -80,11 +78,6 @@ export default {
         this.stopDisplay();
       }
       if (this.isWin || this.gridFull) {
-        if (this.$store.getters.getWinner === 1) {
-          this.winString = "The winner is player 1 (cross)";
-        } else {
-          this.winString = "The winner is player 2 (circle)";
-        }
         this.stopDisplay();
         this.$store.dispatch("AFTER_PLAY");
       }
@@ -146,6 +139,13 @@ export default {
         }
       }
       return false;
+    },
+    winString() {
+      if (this.$store.getters.getWinner === 1) {
+        return "The winner is player 1 (cross)";
+      } else {
+        return "The winner is player 2 (circle)";
+      }
     },
   },
   beforeDestroy() {
