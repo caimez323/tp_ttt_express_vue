@@ -1,29 +1,28 @@
 <template>
   <div class="home">
-    <h1>Tic tac toe</h1>
+    <h1>
+      <u><font size="7" face="cambia" color="black">Tic tac toe</font></u>
+    </h1>
     <img alt="logo" src="../assets/logo.png" />
-    <a class="txtAbout" v-bind:href="url">About</a>
+    <p class="bottomTxt">
+      <font size="5" face="cambia" color="black"
+        >Start playing <router-link to="/create">now</router-link> !
+      </font>
+    </p>
   </div>
 </template>
-<script>
-export default {
-  data: function () {
-    return {
-      url: window.location.href + "about",
-    };
-  },
-};
-</script>
 
 <style lang="scss" scoped>
+.home {
+  position: relative;
+  top: 10%;
+  left: 0%;
+}
+.bottomTxt {
+  margin-top: 50px;
+}
 img {
   width: 15em;
   height: auto;
-}
-.txtAbout {
-  color: rgb(3, 3, 65);
-  position: absolute;
-  bottom: 50px;
-  left: 50px;
 }
 </style>

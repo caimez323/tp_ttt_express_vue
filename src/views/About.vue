@@ -1,5 +1,9 @@
 <template>
   <div>
+    <br />
+    <br />
+    <br />
+    <br />
     <p class="txt">A project made by Clement THIEBAULT</p>
     <p class="txt">Find the project on <a v-bind:href="url">github.com</a></p>
   </div>
@@ -16,6 +20,8 @@ export default {
 
 <style lang="scss" scoped>
 .txt {
+  position: relative;
+  margin-top: 30px;
   margin-left: 20px;
   text-align: left;
   font-size: 18px;

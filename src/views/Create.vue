@@ -3,6 +3,8 @@
     <br />
     <br />
     <br />
+    <br />
+    <br />
     <h1 class="txtBlack">
       Click on the button to create your game and invite a friend !
     </h1>

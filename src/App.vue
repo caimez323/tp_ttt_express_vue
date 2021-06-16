@@ -23,13 +23,14 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-
+  width: 97vw;
+  height: 97vh;
   a {
     font-weight: bold;
     color: #112233;
 
     &.router-link-exact-active {
-      color: #66cc99;
+      color: #d34242;
     }
   }
 }

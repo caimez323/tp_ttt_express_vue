@@ -1,8 +1,12 @@
 <template>
   <div class="play">
     <br v-if="!isWin" />
-    <h1 class="txtBlack" v-if="isWin && isPlaying">{{ winString }}</h1>
-    <h1 class="txtBlack" v-if="gridFull">Draw !</h1>
+    <h1 class="txtBlack" v-if="isWin && isPlaying">
+      <font size="5" color="33E03A">{{ winString }}</font>
+    </h1>
+    <h1 class="txtBlack" v-if="gridFull">
+      <font size="5" color="C40000">Draw !</font>
+    </h1>
     <p class="txtRed" v-if="!gameExist && isPlaying">
       This game doesn't exist.
     </p>
@@ -227,5 +231,8 @@ export default {
 }
 .circle:hover {
   cursor: not-allowed;
+}
+.play {
+  margin-top: 4%;
 }
 </style>
